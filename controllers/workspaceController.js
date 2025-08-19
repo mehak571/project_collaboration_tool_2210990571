@@ -1,7 +1,7 @@
-import Workspace from "../models/workspaceModel.js";
+const Workspace = require("../models/workspaceModel.js");
 
 // Create a new workspace
-export const createWorkspace = async (req, res) => {
+exports.createWorkspace = async (req, res) => {
   try {
     const { name, participants = [] } = req.body;
     const ownerId = req.user._id; 
@@ -24,7 +24,7 @@ export const createWorkspace = async (req, res) => {
 };
 
 // Get a single workspace
-export const getWorkspace = async (req, res) => {
+exports.getWorkspace = async (req, res) => {
   try {
     const workspaceId = req.params.id;
     const workspace = await Workspace.findById(workspaceId)
@@ -42,7 +42,7 @@ export const getWorkspace = async (req, res) => {
 };
 
 // Update workspace
-export const updateWorkspace = async (req, res) => {
+exports.updateWorkspace = async (req, res) => {
   try {
     const workspaceId = req.params.id;
     const updates = req.body;
@@ -60,7 +60,7 @@ export const updateWorkspace = async (req, res) => {
 };
 
 // Delete workspace
-export const deleteWorkspace = async (req, res) => {
+exports.deleteWorkspace = async (req, res) => {
   try {
     const workspaceId = req.params.id;
     await Workspace.findByIdAndDelete(workspaceId)
@@ -72,3 +72,5 @@ export const deleteWorkspace = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+

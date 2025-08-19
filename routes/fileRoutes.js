@@ -1,12 +1,26 @@
-import express from "express"
+const express = require('express');
 const router = express.Router();
-import {protect}  from "../middleware/authMiddleware.js";
-import {createFile , getFile , updateFile , deleteFile} from "../controllers/fileController.js"
+// const {protect}  = require( "../middleware/authMiddleware");
+const {createFile , getFile , updateFile , deleteFile} =require( "../controllers/fileController");
 
-router.post('/',protect ,createFile);
-router.get('/', protect, getFile);
-router.get('/:id', protect, getFile);
-router.put('/:id', protect, updateFile);
-router.delete('/:id', protect, deleteFile);
+function auth(req, res, next) {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) return res.status(401).json({ msg: 'No token provided' });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id: decoded.id };
+    next();
+  } catch (err) {
+    return res.status(401).json({ msg: 'Invalid token' });
+  }
+}
 
-export default router;
+
+router.post('/',auth ,createFile);
+router.get('/', auth, getFile);
+router.get('/:id', auth, getFile);
+router.put('/:id', auth, updateFile);
+router.delete('/:id', auth, deleteFile);
+
+module.exports = router;

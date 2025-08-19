@@ -1,7 +1,7 @@
-import  File from "../models/fileModel.js";
+const  File = require("../models/fileModel.js");
 
 // Create a new file in a workspace
-export const createFile = async (req, res) => {
+exports.createFile = async (req, res) => {
   try {
     const { workspace, filename, language, content = '' } = req.body;
     const creatorId = req.user._id;
@@ -21,7 +21,7 @@ export const createFile = async (req, res) => {
 };
 
 // Get a single file or all files in a workspace
-export const getFile = async (req, res) => {
+exports.getFile = async (req, res) => {
   try {
     // If workspace id is sent in query → return list of files for that workspace
     if (req.query.workspace) {
@@ -44,7 +44,7 @@ export const getFile = async (req, res) => {
 };
 
 // Update a file
-export const updateFile = async (req, res) => {
+exports.updateFile = async (req, res) => {
   try {
     const fileId = req.params.id;
     const updates = req.body;
@@ -62,7 +62,7 @@ export const updateFile = async (req, res) => {
 };
 
 // Delete a file
-export const deleteFile = async (req, res) => {
+exports.deleteFile = async (req, res) => {
   try {
     const fileId = req.params.id;
     await File.findByIdAndDelete(fileId);

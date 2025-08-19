@@ -1,12 +1,23 @@
-import express from "express"
+const express = require("express");
 const router = express.Router();
-import { protect } from "../middleware/authMiddleware.js";
-import { createWorkspace, getWorkspace, updateWorkspace, deleteWorkspace } from "../controllers/workspaceController.js";
+// const { protect } = require("../middleware/authMiddleware");
+const { createWorkspace, getWorkspace, updateWorkspace, deleteWorkspace } = require( "../controllers/workspaceController");
+function auth(req, res, next) {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) return res.status(401).json({ msg: 'No token provided' });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id: decoded.id };
+    next();
+  } catch (err) {
+    return res.status(401).json({ msg: 'Invalid token' });
+  }
+}
 
+router.post('/', auth, createWorkspace);
+router.get('/:id', auth, getWorkspace);
+router.put('/:id', auth, updateWorkspace);
+router.delete('/:id', auth, deleteWorkspace);
 
-router.post('/', protect, createWorkspace);
-router.get('/:id', protect, getWorkspace);
-router.put('/:id', protect, updateWorkspace);
-router.delete('/:id', protect, deleteWorkspace);
-
-export default router;
+module.exports = router;
