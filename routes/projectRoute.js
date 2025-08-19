@@ -1,3 +1,5 @@
+const express = require('express');
+const router = express.Router();
 const jwt = require('jsonwebtoken');
 
 // Simple auth middleware
@@ -13,8 +15,6 @@ function auth(req, res, next) {
     return res.status(401).json({ msg: 'Invalid token' });
   }
 }
-const express = require('express');
-const router = express.Router();
 const {
   createProject,
   getProjects,
