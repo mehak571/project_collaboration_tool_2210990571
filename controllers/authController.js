@@ -1,40 +1,26 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const sendEmail = require("../utils/mailer");
+const sendMail = require("../utils/mailer");
 
-
-
+// Signup
 exports.register = async (req, res) => {
   try {
-    if (!req.body || typeof req.body !== "object") {
-      return res.status(400).json({ msg: "Request body is required" });
-    }
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ msg: "name, email and password are required" });
-    }
 
     // check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ msg: "User already exists" });
 
+    const user = new User({ name, email, password }); // password will auto-hash
+    await user.save();
 
-    // Create new user (password will be hashed by pre-save hook)
-    const newUser = new User({ name, email, password });
-    await newUser.save();
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    // send welcome email
+    await sendMail(email, "Welcome!",` Hi ${name}, your account is ready.`);
 
-    // Send welcome email
-    await sendEmail(email, "Welcome to Our App", `Hello ${name}, thanks for signing up!`);
-
-    res.status(201).json({
-      msg: "User registered successfully",
-      token,
-      user: { id: newUser._id, name: newUser.name, email: newUser.email }
-    });
-
+    res.status(201).json({ msg: "User registered successfully", token });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: err.message });
@@ -44,13 +30,7 @@ exports.register = async (req, res) => {
 // Login
 exports.login = async (req, res) => {
   try {
-    if (!req.body || typeof req.body !== "object") {
-      return res.status(400).json({ msg: "Request body is required" });
-    }
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ msg: "email and password are required" });
-    }
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: "User does not exist" });
@@ -60,15 +40,13 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
+    // Corrected template literal
     await sendMail(email, "Login Successful", `Hi ${user.name}, you just logged in!`);
 
-    res.json({
-      msg: "Login successful",
-      token,
-      user: { id: user._id, name: user.name, email: user.email }
-    });
+    res.json({ msg: "Login successful", token });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: err.message });
   }
 };
+

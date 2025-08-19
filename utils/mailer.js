@@ -6,7 +6,7 @@ const sendMail = async (to, subject, text) => {
       service: "gmail",
       auth: {
         user: "nipunr288@gmail.com",
-        pass: "bgrn qmzs rnsa gqvj", // app password
+        pass: "bgrnqmzsrnsagqvj", // app password
       },
     });
 
